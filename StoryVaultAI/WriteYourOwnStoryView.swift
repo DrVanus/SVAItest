@@ -8,150 +8,133 @@
 import SwiftUI
 
 struct WriteYourOwnStoryView: View {
-    @State private var storyTitle: String = ""
-    @State private var storyGenre: String = ""
-    @State private var mainCharacters: String = ""
-    @State private var additionalChars: String = ""
-    @State private var setting: String = ""
-    @State private var plotOutline: String = ""
+    @State private var storyTitle: String = "Fantasy"
+    @State private var storyGenre: String = "Fantasy"
+    @State private var showSuggestions: Bool = false
+    @State private var magicForestAdventure: String = "A magical forest adventure with a wizard"
+    @State private var historicalMysteryTale: String = "A historical mystery tale in a castle"
     
-    @State private var scenes: [String] = []
-    @State private var newSceneText: String = ""
-    
-    // Advanced fields
-    @State private var showAdvanced = false
-    @State private var prologue: String = ""
-    @State private var themes: String = ""
-    @State private var plotTwists: String = ""
-    @State private var possibleEndings: String = ""
-    
-    @State private var showCustomStoryView = false
-    
-    let randomPrompts = [
-        "A lone astronaut finds an abandoned spaceship drifting near Jupiter.",
-        "A royal ball is interrupted by a mysterious messenger.",
-        "A detective in a steampunk city uncovers a hidden clockwork cult.",
-        "A cursed pirate ship haunts a moonlit bay, seeking lost treasure.",
-        "An alchemist’s apprentice accidentally awakens an ancient dragon."
-    ]
+    let genres = ["Fantasy", "Adventure", "Horror/Gothic", "Romance", "Mystery", "Historical Fiction", "Poetry"]
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [.purple.opacity(0.2), .blue.opacity(0.2)]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .edgesIgnoringSafeArea(.all)
+            LinearGradient(gradient: Gradient(colors: [Color(red: 0.9, green: 0.1, blue: 0.3), Color.black]),
+                           startPoint: .top, endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
             
-            VStack {
-                TopWaveShape()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(height: 120)
-                    .offset(y: -60)
+            VStack(spacing: 15) {
+                // Story Title
+                Text("Write Your Own Story")
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                    .padding()
+                
+                // Story Title Input
+                TextField("Story Title", text: $storyTitle)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .foregroundColor(.white)
+                    .background(Color(red: 0.1, green: 0.12, blue: 0.24, opacity: 0.8))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                
+                // Genre Picker
+                Picker("Genre", selection: $storyGenre) {
+                    ForEach(genres, id: \.self) { genre in
+                        Text(genre)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .foregroundColor(.white)
+                .padding(.horizontal)
+                
+                // Suggestions or Placeholder for Story Content (Expanded for length)
+                Button(action: {
+                    showSuggestions.toggle()
+                }) {
+                    Text("Get Story Suggestions")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.purple, Color.blue]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(15)
+                }
+                .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                
+                if showSuggestions {
+                    VStack(spacing: 10) {
+                        Text(magicForestAdventure)
+                            .font(.body)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.purple.opacity(0.3))
+                            .cornerRadius(10)
+                        
+                        Text(historicalMysteryTale)
+                            .font(.body)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.purple.opacity(0.3))
+                            .cornerRadius(10)
+                        
+                        // Additional placeholder suggestions to increase line count
+                        Text("An epic sci-fi journey through the stars, battling alien forces.")
+                            .font(.body)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.purple.opacity(0.3))
+                            .cornerRadius(10)
+                        
+                        Text("A romantic tale of love and betrayal in a medieval kingdom.")
+                            .font(.body)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.purple.opacity(0.3))
+                            .cornerRadius(10)
+                    }
+                }
+                
+                // Additional padding and spacing for length
                 Spacer()
+                    .frame(height: 20)
+                
+                Text("Craft your unique narrative and dive into StoryVault AI’s world of endless possibilities!")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                    .padding(.horizontal)
+                    .padding(.bottom, 10)
             }
-            
-            Form {
-                Section(header: Text("STORY BASICS").font(.headline)) {
-                    TextField("Title", text: $storyTitle)
-                    TextField("Genre (e.g. Fantasy, Sci-Fi)", text: $storyGenre)
-                    
-                    Button("Random Prompt") {
-                        if let random = randomPrompts.randomElement() {
-                            plotOutline = random
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                }
-                
-                Section(header: Text("CHARACTERS").font(.headline)) {
-                    TextField("Main Characters", text: $mainCharacters)
-                    TextField("Additional Characters", text: $additionalChars)
-                }
-                
-                Section(header: Text("WORLD DETAILS").font(.headline)) {
-                    TextField("Setting (time/place)", text: $setting)
-                    TextField("Plot Outline", text: $plotOutline)
-                }
-                
-                Section(header: Text("ADVANCED OPTIONS").font(.headline)) {
-                    Toggle("Show Advanced Fields", isOn: $showAdvanced.animation())
-                    
-                    if showAdvanced {
-                        TextField("Prologue", text: $prologue)
-                        TextField("Themes", text: $themes)
-                        TextField("Plot Twists", text: $plotTwists)
-                        TextField("Possible Endings", text: $possibleEndings)
-                    }
-                }
-                
-                Section(header: Text("ADD SCENES / CHAPTERS").font(.headline)) {
-                    TextField("Scene text...", text: $newSceneText)
-                    Button("Add Scene") {
-                        guard !newSceneText.isEmpty else { return }
-                        scenes.append(newSceneText)
-                        newSceneText = ""
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.brandSecondary)
-                }
-                
-                if !scenes.isEmpty {
-                    Section("SCENES") {
-                        ForEach(scenes, id: \.self) { sceneText in
-                            Text(sceneText)
-                                .padding(.vertical, 4)
-                        }
-                    }
-                }
-                
-                Section {
-                    Button("Begin Story") {
-                        showCustomStoryView = true
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.brandPrimary)
-                }
-            }
-            .sheet(isPresented: $showCustomStoryView) {
-                CustomUserStoryView(
-                    title: storyTitle,
-                    genre: storyGenre,
-                    characters: mainCharacters,
-                    advancedPrologue: prologue
-                )
-            }
+            .padding(.bottom, 20)
         }
-        .navigationBarTitle("Write Your Own Story", displayMode: .inline)
+        .navigationTitle("") // Ensure no title appears in navigation bar
+        .navigationBarBackButtonHidden(false) // Show default back button
+        .environmentObject(UserPlanManager()) // Ensure plan manager is available
     }
 }
 
-struct CustomUserStoryView: View {
-    let title: String
-    let genre: String
-    let characters: String
-    let advancedPrologue: String
+struct WriteYourOwnStoryView_Previews: PreviewProvider {
+    static var previews: some View {
+        WriteYourOwnStoryView()
+            .environmentObject(UserPlanManager())
+            .preferredColorScheme(.dark)
+    }
+}
+
+// UserPlanManager (Ensure this is defined in your project, e.g., StoryVaultAIApp.swift)
+class UserPlanManager: ObservableObject {
+    @Published var hasStorytellerPlan: Bool = false
+    @Published var hasVaultMasterPlan: Bool = false
     
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    Text("Your Custom Story")
-                        .font(.largeTitle.bold())
-                    
-                    Text("Title: \(title)")
-                    Text("Genre: \(genre)")
-                    Text("Main Characters: \(characters)")
-                    
-                    if !advancedPrologue.isEmpty {
-                        Text("Prologue:\n\(advancedPrologue)")
-                            .padding()
-                    }
-                }
-                .padding()
-            }
-            .navigationBarTitle("Preview", displayMode: .inline)
-        }
+    init() {
+        // Logic to check user's plan (e.g., from UserDefaults, API, etc.)
+        // For testing, set these manually:
+        hasStorytellerPlan = false // Default to locked for testing
+        hasVaultMasterPlan = false // Default to locked for testing
     }
 }

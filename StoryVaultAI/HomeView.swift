@@ -8,244 +8,158 @@
 import SwiftUI
 
 struct HomeView: View {
-    // Define your book data structure, conforming to Equatable
-    struct Book: Equatable { // Added Equatable conformance
-        let title: String
-        let genre: String
-        let coverImage: String // Name of the image in Assets.xcassets (e.g., "cover_alice_wonderland_home")
-        
-        // Implement Equatable by defining ==
-        static func ==(lhs: Book, rhs: Book) -> Bool {
-            return lhs.title == rhs.title &&
-                   lhs.genre == rhs.genre &&
-                   lhs.coverImage == rhs.coverImage
-        }
-    }
+    // If you have an environment object for your library or AI logic, keep it here:
+    // @EnvironmentObject var library: LibraryModel
     
-    // Sample book data for featured stories (replace with your actual featured books)
+    // Example featured books array for the top slider (expanded with more books)
     let featuredBooks: [Book] = [
-        Book(title: "Alice's Adventures in Wonderland", genre: "Fantasy", coverImage: "cover_alice_wonderland_home"),
-        Book(title: "The Wonderful Wizard of Oz", genre: "Fantasy", coverImage: "cover_wizard_of_oz_home"),
-        Book(title: "Dracula", genre: "Horror/Gothic", coverImage: "cover_dracula_home")
+        Book(title: "Alice’s Adventures in Wonderland", coverImage: "cover_alice_wonderland", isFeatured: true, genre: "Fantasy"),
+        Book(title: "Peter Pan", coverImage: "cover_peter_pan", isFeatured: true, genre: "Fantasy"),
+        Book(title: "Mystery of the Lost Kingdom", coverImage: "cover_mystery_lost_kingdom", isFeatured: true, genre: "Mystery & Detective Fiction"),
+        Book(title: "Dark Forest Chronicles", coverImage: "cover_dark_forest_chronicles", isFeatured: true, genre: "Horror"),
+        Book(title: "The Phantom of the Opera", coverImage: "cover_phantom_opera", isFeatured: true, genre: "Mystery & Detective Fiction")
     ]
     
-    // State for controlling the preview pop-up
-    @State private var showPreview = false
-    @State private var selectedBook: Book?
+    // Example array of genres to display in the horizontal scroll
+    let genres: [String] = [
+        "Fantasy",
+        "Adventure",
+        "Horror",
+        "Romance",
+        "Mystery & Detective Fiction",
+        "Science Fiction"
+    ]
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Featured Stories Carousel with Animations
-                    TabView {
-                        ForEach(featuredBooks, id: \.title) { book in
-                            FeaturedBookView(book: book)
-                                .onTapGesture {
-                                    selectedBook = book
-                                    showPreview = true
-                                }
+        ZStack { // No NavigationView here, as it’s handled at the app level in MainTabView
+            // Full-Screen Blue-Black Gradient Background
+            LinearGradient(
+                gradient: Gradient(colors: [Color.black, Color.blue.opacity(0.5)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 20) {
+                // Larger Book Cover Slider (Carousel) with Book Covers
+                TabView {
+                    ForEach(featuredBooks) { book in
+                        NavigationLink(destination: AIAdventureBetaView(story: book.title)) {
+                            ZStack {
+                                // Use local image names (replace with your actual image names in Assets.xcassets)
+                                Image(book.coverImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: UIScreen.main.bounds.width - 40, height: 300)
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                    .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                                
+                                // Title overlay
+                                Text(book.title)
+                                    .font(.title2)
+                                    .foregroundColor(.white)
+                                    .padding(8)
+                                    .background(Color.black.opacity(0.5))
+                                    .cornerRadius(10)
+                                    .padding(.bottom, 20)
+                                    .padding(.horizontal, 20)
+                            }
                         }
+                        .padding(.horizontal, 20)
                     }
-                    .tabViewStyle(PageTabViewStyle())
-                    .frame(height: 450)
-                    .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-                    .animation(.easeInOut, value: featuredBooks)
-                    
-                    // AI Adventure (Beta) Section
-                    VStack(spacing: 10) {
-                        Text("AI Adventure (Beta)")
-                            .foregroundColor(.white)
-                            .font(.headline)
-                        NavigationLink(destination: AIBetaAdventureView()) {
-                            Text("Try the Beta Experience")
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.purple.opacity(0.7))
-                                .cornerRadius(10)
+                }
+                .tabViewStyle(PageTabViewStyle())
+                .frame(height: 300)
+                .padding(.top, 20)
+                
+                // Write Your Own Story Button (Purple-Blue Gradient, Now Functional)
+                NavigationLink(destination: WriteYourOwnStoryView()) {
+                    Text("Write Your Own Story")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.purple, Color.blue]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                }
+                
+                // Horizontal Scroll of Genres (Purple-Blue Gradient Buttons, Now Functional)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(genres, id: \.self) { genre in
+                            Button(action: {
+                                // Update selected genre and log for debugging
+                                print("Selected genre: \(genre)")
+                                // Add navigation or filtering logic here if needed (e.g., navigate to MarketplaceView filtered by genre)
+                                // For now, it prints to console—expand as needed
+                            }) {
+                                Text(genre)
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color.purple, Color.blue]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .cornerRadius(20)
+                            }
+                            .shadow(color: Color.black.opacity(0.3), radius: 3, x: 0, y: 2)
                         }
                     }
                     .padding(.horizontal)
-                    
-                    // "Write Your Own Story" Button
-                    NavigationLink(destination: WriteYourOwnStoryView()) {
-                        Text("Write Your Own Story")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.purple.opacity(0.7))
-                            .cornerRadius(10)
-                    }
-                    .padding()
-                    
-                    // "View All" Button to Navigate to Marketplace
-                    NavigationLink(destination: MarketplaceView()) {
-                        Text("View All Stories")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.purple.opacity(0.7))
-                            .cornerRadius(10)
-                    }
-                    .padding()
-                    
-                    // Genre Quick Links
-                    HStack(spacing: 10) {
-                        ForEach(["Fantasy", "Adventure", "Horror/Gothic", "Romance"], id: \.self) { genre in
-                            NavigationLink(destination: BooksByGenreView(genre: genre)) {
-                                Text(genre)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .background(Color.purple.opacity(0.7))
-                                    .cornerRadius(10)
-                            }
-                        }
-                    }
-                    .padding()
-                    
-                    // Placeholder for Recent Activity or Achievements
-                    Text("Recent Activity & Achievements Coming Soon")
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.black.opacity(0.8))
-                        .cornerRadius(10)
                 }
-                .padding()
+                
+                // Recent Activity & Achievements Placeholder
+                Text("Recent Activity & Achievements Coming Soon")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                
+                Spacer()
             }
-            .background(Color.black.edgesIgnoringSafeArea(.all))
-            .navigationTitle("StoryVault AI")
-            .sheet(isPresented: $showPreview) {
-                if let book = selectedBook {
-                    PreviewView(book: book)
-                }
-            }
+            .padding(.bottom, 20)
         }
+        .navigationTitle("") // Ensure no title appears in navigation bar
+        .navigationBarHidden(true) // Hide navigation bar for clean home screen
+        .environmentObject(UserPlanManager()) // Ensure plan manager is available
     }
-}
-
-// Custom view for each featured book in the carousel, with animations
-struct FeaturedBookView: View {
-    let book: HomeView.Book
     
-    var body: some View {
-        Group {
-            if let uiImage = UIImage(named: book.coverImage) {
-                VStack {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 300, height: 450)
-                        .cornerRadius(12)
-                        .scaleEffect(1.0) // Base scale for animation
-                        .animation(.easeInOut(duration: 0.3), value: uiImage)
-                    Text(book.title)
-                        .foregroundColor(.white)
-                        .font(.title2)
-                        .padding()
-                }
-            } else {
-                Rectangle()
-                    .fill(Color.gray)
-                    .frame(width: 300, height: 450)
-                    .cornerRadius(12)
-                    .overlay(Text("No Cover").foregroundColor(.white))
-            }
-        }
-        .onAppear {
-            if UIImage(named: book.coverImage) == nil {
-                print("Failed to load image: \(book.coverImage)")
-            }
-        }
+    // If you have custom functions like navigateToAdventure(book:) or navigateToMarketplaceGenre(genre:),
+    // define them here or remove references above.
+    /*
+    private func navigateToAdventure(book: Book) {
+        // Implement your logic for AI Adventure or detail screen
     }
-}
-
-// Preview view for showing a sample AI interaction
-struct PreviewView: View {
-    let book: HomeView.Book
     
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Text("Preview: \(book.title)")
-                    .foregroundColor(.white)
-                    .font(.title)
-                    .padding()
-                
-                // Sample AI Interaction (Placeholder for choice-based narrative)
-                Text("Choose your path in this AI adventure:")
-                    .foregroundColor(.white)
-                    .font(.headline)
-                
-                VStack(spacing: 10) {
-                    Button("Explore the Rabbit Hole") {
-                        // Placeholder for AI logic
-                        print("Selected: Explore the Rabbit Hole for \(book.title)")
-                    }
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.purple.opacity(0.7))
-                    .cornerRadius(10)
-                    
-                    Button("Follow the White Rabbit") {
-                        // Placeholder for AI logic
-                        print("Selected: Follow the White Rabbit for \(book.title)")
-                    }
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.purple.opacity(0.7))
-                    .cornerRadius(10)
-                    
-                    Button("Stay Above Ground") {
-                        // Placeholder for AI logic
-                        print("Selected: Stay Above Ground for \(book.title)")
-                    }
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.purple.opacity(0.7))
-                    .cornerRadius(10)
-                }
-                .padding()
-                
-                Button("Close Preview") {
-                    // Dismiss the preview (handled by sheet)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.red.opacity(0.7))
-                .cornerRadius(10)
-            }
-            .background(Color.black.edgesIgnoringSafeArea(.all))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        // Dismiss the preview (handled by sheet)
-                    }
-                }
-            }
-        }
+    private func navigateToMarketplaceGenre(_ genre: String) {
+        // Implement your logic to open Marketplace filtered by this genre
     }
+    */
 }
 
-// Placeholder view for AI Adventure (Beta)
-struct AIBetaAdventureView: View {
-    var body: some View {
-        Text("AI Adventure Beta Experience")
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.black.edgesIgnoringSafeArea(.all))
-            .navigationTitle("AI Adventure (Beta)")
-    }
-}
-
-// Placeholder view for books by genre (to be implemented fully later)
-struct BooksByGenreView: View {
+// Example Book struct (already defined, but included for completeness)
+struct Book: Identifiable {
+    let id = UUID()
+    let title: String
+    let coverImage: String
+    let isFeatured: Bool
     let genre: String
-    
-    var body: some View {
-        Text("Books in \(genre)")
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.black.edgesIgnoringSafeArea(.all))
-            .navigationTitle(genre)
+}
+
+struct HomeView_Previews: PreviewProvider {
+    static var previews: some View {
+        HomeView()
+            .environmentObject(UserPlanManager())
+            .preferredColorScheme(.dark)
     }
 }

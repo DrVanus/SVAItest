@@ -12,38 +12,33 @@ struct MainTabView: View {
         TabView {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "house.fill")
+                    HomeIconView()  // Use the custom composite icon
+                    Text("Home")
                 }
             
             LibraryView()
                 .tabItem {
-                    Label("Library", systemImage: "book.closed.fill")
+                    Image(systemName: "book.closed.fill")
+                    Text("Library")
                 }
             
             MarketplaceView()
                 .tabItem {
-                    Label("Marketplace", systemImage: "books.vertical.fill")
+                    Image(systemName: "books.vertical.fill")
+                    Text("Marketplace")
                 }
             
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person.fill")
-                }
-            
-            WriteYourOwnStoryView()
-                .tabItem {
-                    Label("Write", systemImage: "pencil")
+                    Image(systemName: "person.fill")
+                    Text("Profile")
                 }
         }
-        .accentColor(.purple) // Match your app’s theme
-        .environmentObject(LibraryModel()) // Provide LibraryModel to the entire tab view hierarchy
     }
 }
 
 struct MainTabView_Previews: PreviewProvider {
     static var previews: some View {
         MainTabView()
-            .preferredColorScheme(.dark)
-            .environmentObject(LibraryModel()) // Add for previews
     }
 }
